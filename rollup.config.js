@@ -16,11 +16,11 @@ export default {
   input: 'lib/index.js',
   output: {
     file: 'dist/v-unicode.min.js',
-    format: 'umd'
+    format: 'umd',
+    banner
   },
   moduleId: 'v-unicode',
   name: 'v-unicode',
-  banner,
   plugins: [
     resolve({
       jsnext: true,
