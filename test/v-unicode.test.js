@@ -1,10 +1,10 @@
 
-/* global jest describe it expect beforeEach */
+/* global jest describe it expect */
 
-import unicde from '../lib/index'
+import unicode from '../lib/index'
 
-const plugin = unicde
-const directive = unicde.directive
+const plugin = unicode
+const directive = unicode.directive
 
 describe('v-unicode -> plugin', () => {
   it('install the directive into the vue instance', () => {
@@ -18,95 +18,95 @@ describe('v-unicode -> plugin', () => {
 })
 
 describe('v-unicode -> directive', () => {
-  let input = document.createElement('input')
-
-  beforeEach(() => {
-    directive.in = undefined
-    directive.from = undefined
-    directive.to = undefined
-    input = document.createElement('input')
-  })
-
-  it('it has bind, update and unbind methods available', () => {
+  it('it has a bind and unbind methods available', () => {
     expect(typeof directive.bind).toBe('function')
     expect(typeof directive.unbind).toBe('function')
   })
 
-  describe('bind', () => {
-    beforeEach(() => {
-      directive.in = undefined
-      directive.from = undefined
-      directive.to = undefined
-    })
+  it('it has a shouldRestrict, onKeyPress, onPaste, config and validate methods available', () => {
+    expect(typeof directive.shouldRestrict).toBe('function')
+    expect(typeof directive.onKeyPress).toBe('function')
+    expect(typeof directive.onPaste).toBe('function')
+    expect(typeof directive.config).toBe('function')
+    expect(typeof directive.validate).toBe('function')
+  })
 
-    it('adds an event listener to the element', () => {
+  describe('bind', () => {
+    it('adds event listeners to the element', () => {
+      const input = document.createElement('input')
+
       input.addEventListener = jest.fn()
       directive.bind(input, { value: [] })
-      expect(input.addEventListener.mock.calls.length).toBe(1)
+      expect(input.addEventListener.mock.calls.length).toBe(2)
     })
 
     it('throws an error if value is not an object', () => {
-      const updateWithNoArray = () => directive.bind(input, { value: () => {} })
-      expect(updateWithNoArray).toThrowError(/Argument must be an object/)
+      const input = document.createElement('input')
+      const bindWithInvalidValue = () => directive.bind(input, { value: () => {} })
+
+      expect(bindWithInvalidValue).toThrowError(/Argument must be an object/)
     })
 
     it('throws an error if value is not an array', () => {
-      const updateWithNoArray = () => directive.bind(input, {})
-      expect(updateWithNoArray).toThrowError(/Argument must be an object/)
-    })
+      const input = document.createElement('input')
+      const bindWithInvalidValue = () => directive.bind(input, {})
 
-    it('saves the unicode array values', () => {
-      const unicodeValues = [57, 100]
-      directive.bind(input, { value: unicodeValues })
-      expect(directive.in).toBe(unicodeValues)
-      expect(directive.from).toBe(undefined)
-      expect(directive.to).toBe(undefined)
-    })
-
-    it('saves the from value', () => {
-      const from = 57
-      directive.bind(input, { value: { from } })
-      expect(directive.from).toBe(57)
-      expect(directive.in).toBe(undefined)
-      expect(directive.to).toBe(undefined)
-    })
-
-    it('saves the to value', () => {
-      const to = 57
-      directive.bind(input, { value: { to } })
-      expect(directive.to).toBe(57)
-      expect(directive.in).toBe(undefined)
-      expect(directive.from).toBe(undefined)
-    })
-
-    it('saves the from and to values', () => {
-      const between = { from: 40, to: 60 }
-      directive.bind(input, { value: between })
-      expect(directive.from).toBe(40)
-      expect(directive.to).toBe(60)
-      expect(directive.in).toBe(undefined)
+      expect(bindWithInvalidValue).toThrowError(/Argument must be an object/)
     })
   })
 
   describe('unbind', () => {
-    it('removes the event listener from the element', () => {
+    it('removes the event listeners from the element', () => {
+      const input = document.createElement('input')
+      const binding = { value: [] }
+
       input.removeEventListener = jest.fn()
-      directive.bind(input, { value: [] })
-      directive.unbind(input)
-      expect(input.removeEventListener.mock.calls.length).toBe(1)
+      directive.bind(input, binding)
+      directive.unbind(input, binding)
+      expect(input.removeEventListener.mock.calls.length).toBe(2)
     })
   })
 
-  describe('onEvent', () => {
-    it('it executes the event listener callback and it prevents the default if the event is not allowed', () => {
+  describe('onKeyPress', () => {
+    it('it prevents the default if the event charCode is not allowed', () => {
       const preventDefault = jest.fn()
       const event = { charCode: 54, preventDefault }
-      const allowedValues = [52]
+      const bindingValue = [51]
 
-      directive.bind(input, { value: allowedValues })
-
-      directive.onEvent(event)
+      directive.onKeyPress(event, bindingValue)
       expect(preventDefault).toHaveBeenCalled()
+    })
+  })
+
+  describe('onPaste', () => {
+    it('it prevents the default if the event charCode is not allowed', () => {
+      const input = document.createElement('input')
+      const bindingValue = [51]
+      const preventDefault = jest.fn()
+      const content = 'FOO'
+      const event = {
+        preventDefault,
+        clipboardData: { getData: () => content }
+      }
+
+      directive.onPaste(input, event, bindingValue)
+      expect(preventDefault).toHaveBeenCalled()
+    })
+
+    it('sanitizes the pasted values into the input value', () => {
+      const input = document.createElement('input')
+      const bindingValue = { from: 48, to: 57 } // Numeric values
+      const preventDefault = jest.fn()
+      const content = 'FOO-123-BAR-456'
+      const sanitizedContent = '123456'
+      const event = {
+        preventDefault,
+        clipboardData: { getData: () => content }
+      }
+
+      directive.onPaste(input, event, bindingValue)
+      expect(preventDefault).toHaveBeenCalled()
+      expect(input.value).toEqual(sanitizedContent)
     })
   })
 })
