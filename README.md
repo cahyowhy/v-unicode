@@ -7,7 +7,7 @@
 [![bitHound Dev Dependencies](https://www.bithound.io/github/ndelvalle/v-unicode/badges/devDependencies.svg)](https://www.bithound.io/github/ndelvalle/v-unicode/master/dependencies/npm)
 [![bitHound Code](https://www.bithound.io/github/ndelvalle/v-unicode/badges/code.svg)](https://www.bithound.io/github/ndelvalle/v-unicode)
 
-Vue directive to restrict an input by unicode values. It allows the input to be used just with the defined unicodes.
+Vue directive to restrict an input by unicode values. It allows the input to be used just with the defined unicodes. It also sanitizes the value when invalid unicodes are being paste into the input.
 
 ## Install
 
@@ -31,6 +31,7 @@ Vue.use(vUnicode)
 
 ```html
 <template>
+  <!--  Allow only numeric values  -->
   <input type="text" v-unicode="{ from: 48, to: 57 }">
   <input type="text" v-unicode="[48, 49, 50, 51, 52, 53, 54, 55, 56, 57]">
 </template>
