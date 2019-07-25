@@ -33,6 +33,9 @@ Vue.use(vUnicode)
   <!--  Allow only numeric values  -->
   <input type="text" v-unicode="{ from: 48, to: 57 }">
   <input type="text" v-unicode="[48, 49, 50, 51, 52, 53, 54, 55, 56, 57]">
+  
+  <!--  Restrict numeric values  -->
+  <input type="text" v-unicode="{restrict: [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]}">
 </template>
 ```
 

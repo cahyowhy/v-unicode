@@ -108,5 +108,21 @@ describe('v-unicode -> directive', () => {
       expect(preventDefault).toHaveBeenCalled()
       expect(input.value).toEqual(sanitizedContent)
     })
+
+    it('sanitizes the restricted values into the input value', () => {
+      const input = document.createElement('input')
+      const bindingValue = {restrict: [48,49,50,51,52,53,54,55,56,57]} // restrict Numeric values
+      const preventDefault = jest.fn()
+      const content = 'FOO-123-BAR-456'
+      const sanitizedContent = 'FOO--BAR-'
+      const event = {
+        preventDefault,
+        clipboardData: { getData: () => content }
+      }
+
+      directive.onPaste(input, event, bindingValue)
+      expect(preventDefault).toHaveBeenCalled()
+      expect(input.value).toEqual(sanitizedContent)
+    })
   })
 })
